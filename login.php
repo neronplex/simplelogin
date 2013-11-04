@@ -90,6 +90,8 @@ if($_SERVER[REQUEST_METHOD] != 'POST'){
 <!DOCTYPE html>
 <html>
 <head>
+<!- 文字化け対策の文字コード ->
+<meta charset="UTF-8">
 <title>ログインフォーム</title>
 </head>
 
