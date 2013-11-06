@@ -74,7 +74,7 @@ if($_SERVER[REQUEST_METHOD] != 'POST'){
 	$row = mysql_fetch_assoc($query);
 
 		// メールアドレスとパスワードが一致した場合
-		if($row[email] == $email || $row[password] == $hash){
+		if($row[email] == $email && $row[password] == $hash){
 		# セッション・ハイジャック対策
 		session_regenerate_id(true);
 		# 条件分岐用のセッション変数を用意
