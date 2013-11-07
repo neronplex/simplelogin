@@ -38,17 +38,17 @@ if($_SERVER[REQUEST_METHOD] != 'POST')
 	// エラーチェック用の連想配列
 	$err = array();
 
-		# メールアドレスの形式が不正
+		// メールアドレスの形式が不正
 		if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
 		$err[email] = 'メールアドレスの形式が正しくありません。';
 		}
 
-		# メールアドレスが空？
+		// メールアドレスが空？
 		if($email == ''){
 		$err[email] = 'メールアドレスが入力されていません。';
 		}
 
-		# すでに登録されているメールアドレス
+		// すでに登録されているメールアドレス
 		# MySQLの接続情報
 		$link = mysql_connect('localhost','logindb','logindb');
 		mysql_select_db('logindb',$link);
@@ -67,12 +67,12 @@ if($_SERVER[REQUEST_METHOD] != 'POST')
 		mysql_close($link);
 		}
 
-		# パスワードが空？
+		// パスワードが空？
 		if($passworda == '' || $passwordb == ''){
 		$err[password] = 'パスワードが入力されていません。';
 		}
 
-		# パスワードが一致しない
+		// パスワードが一致しない
 		if($passworda !== $passwordb){
 		$err[password] = '入力されたパスワードが一致しません。';
 		}
@@ -92,9 +92,11 @@ if($_SERVER[REQUEST_METHOD] != 'POST')
 		# 成功時と失敗時のシステムメッセージ
 		if($query == true){
 		$message = '会員登録が完了しました。';
+		mysql_close($link);
 		}
 		else{
 		$message = '会員登録が正常に完了出来ませんでした。管理者に連絡してください。';
+		mysql_close($link);
 	}
 }
 ?>
