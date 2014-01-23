@@ -1,102 +1,89 @@
 <?php
+require_once 'functions.php';
+$dbh = new PDO("mysql:host=localhost;dbname=logindb", "logindb", "logindb");
 session_start();
 
-// CSRF対策トークン生成関数
-function settoken(){
-	$token = sha1(uniqid(mt_rand(),true));
-	$_SESSION[token] = $token;
-}
-
-// トークンチェック関数
-function checktoken(){
-	if(empty($_SESSION[token]) || ($_SESSION[token] != $_POST[token]))
-	{
-	# メッセージを表示してスクリプトの処理を終了
-	print('不正な投稿が行われました。');
-	exit;
-	}
-}
-
-if($_SERVER[REQUEST_METHOD] != 'POST')
-	{
+// リクエストメソッドがPOSTかそれ以外かで条件分岐
+if($_SERVER[REQUEST_METHOD] != 'POST') {
 	# トークンをセット
 	settoken();
 	}
-	else{
+	else {
 	# トークンをチェック
 	checktoken();
 
 	// 登録処理のための変数
 	# SQLインジェクション対策のエスケープ処理を施した上で変数に格納
-	$email = mysql_real_escape_string($_POST[email]);
+	$email = $_POST[email];
 	# 変数を2つ用意してパスワードの誤入力チェックを行う
-	$passworda = mysql_real_escape_string($_POST[passworda]);
-	$passwordb = mysql_real_escape_string($_POST[passwordb]);
-	# sha1ハッシュ化した上でパスワードを保存
-	$hash = sha1($passworda);
+	$passworda = $_POST[passworda];
+	$passwordb = $_POST[passwordb];
 
 	// エラーチェック用の連想配列
 	$err = array();
 
 		// メールアドレスの形式が不正
-		if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
+		if(!filter_var($email,FILTER_VALIDATE_EMAIL)) {
 		$err[email] = 'メールアドレスの形式が正しくありません。';
 		}
 
 		// メールアドレスが空？
-		if($email == ''){
+		if($email == '') {
 		$err[email] = 'メールアドレスが入力されていません。';
 		}
 
 		// すでに登録されているメールアドレス
-		# MySQLの接続情報
-		$link = mysql_connect('localhost','logindb','logindb');
-		mysql_select_db('logindb',$link);
-
 		# クエリーとして投げるSQL文
 		# メールアドレスをキーとして検索
-		$sql = "SELECT * FROM users WHERE email = "."'".$email."'";
-		$query = mysql_query($sql);
-
+		$sql = "SELECT * FROM users WHERE email = :email";
+		# クエリの送信準備
+		$stmt = $dbh->prepare($sql);
+		# プレースホルダーの置換方法を指定
+		$params = array(":email" => $email);
+		# ここでクエリがDBに送信される
+		$stmt->execute($params);
 		# 検索条件に一致するレコードを連想配列として取り出す
-		$row = mysql_fetch_assoc($query);
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		# メールアドレスが既存のレコードと一致した場合
-		if($email == $row[email]){
+		if($email == $row[email]) {
 		$err[email] = 'そのメールアドレスはすでに登録されています。';
-		mysql_close($link);
 		}
 
 		// パスワードが空？
-		if($passworda == '' || $passwordb == ''){
+		if($passworda == '' || $passwordb == '') {
 		$err[password] = 'パスワードが入力されていません。';
 		}
 
 		// パスワードが一致しない
-		if($passworda !== $passwordb){
+		if($passworda !== $passwordb) {
 		$err[password] = '入力されたパスワードが一致しません。';
+		} else {
+			# パスワードを保存用にsha1ハッシュ化
+			$hash = sha1($passworda);
 		}
 
 	// エラーがなにもなかった場合
-	if(empty($err)){
-
-	# MySQLの接続情報
-	$link = mysql_connect('localhost','logindb','logindb');
-	mysql_select_db('logindb',$link);
-
-	# クエリーとして投げるSQL文
-	# 入力されたメールアドレスと、パスワードのハッシュ値を登録
-	$sql = "insert into users (email,password) value ("."'".$email."'".","."'".$hash."'".")";
-	$query = mysql_query($sql);
+	if(empty($err)) {
+		try {
+			# クエリーとして投げるSQL文
+			# 入力されたメールアドレスと、パスワードのハッシュ値を登録
+			$sql = "insert into users (email,password) values (:email,:hash)";
+			$stmt = $dbh->prepare($sql);
+			$params = array(":email" => $email,":hash" => $hash);
+			$stmt->execute($params);
+		} catch (PDOException $e) {
+			# エラーメッセージの取得
+			var_dump($e->getMessage());
+		}
 
 		# 成功時と失敗時のシステムメッセージ
-		if($query == true){
+		if(empty($e)) {
 		$message = '会員登録が完了しました。';
-		mysql_close($link);
 		}
-		else{
+		else {
 		$message = '会員登録が正常に完了出来ませんでした。管理者に連絡してください。';
-		mysql_close($link);
+		}
 	}
 }
 ?>
@@ -122,7 +109,7 @@ if($_SERVER[REQUEST_METHOD] != 'POST')
 <p>パスワード <input type="password" name="passworda" value=""> <?php echo $err[password]; ?></p>
 <p>パスワード <input type="password" name="passwordb" value=""> <?php echo $err[password]; ?></p>
 
-<- submitボタン ->
+<!- submitボタン ->
 <input type="submit" value="ログイン">
 </form>
 <center><p><?php echo $message; ?></p></center>
