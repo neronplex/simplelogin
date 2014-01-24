@@ -95,23 +95,23 @@ if($_SERVER[REQUEST_METHOD] != 'POST') {
 </head>
 
 <body>
-<!- タイトル ->
+<!-- タイトル -->
 <h1>新規ユーザー登録フォーム</h1>
 
-<!- 入力フォーム ->
+<!-- 入力フォーム -->
 <form action="" method="POST">
 
-<!- CSRF対策トークン ->
+<!-- CSRF対策トークン -->
 <input type="hidden" name="token" value="<?php echo $_SESSION[token]; ?>">
 
-<!- メールアドレスとパスワードの入力 ->
+<!-- メールアドレスとパスワードの入力 -->
 <p>メールアドレス <input type="text" name="email" value="<?php echo $email; ?>"> <?php echo $err[email]; ?></p>
 <p>パスワード <input type="password" name="passworda" value=""> <?php echo $err[password]; ?></p>
 <p>パスワード <input type="password" name="passwordb" value=""> <?php echo $err[password]; ?></p>
 
-<!- submitボタン ->
+<!-- submitボタン -->
 <input type="submit" value="ログイン">
 </form>
-<center><p><?php echo $message; ?></p></center>
+<div align="center"><p><?php echo $message; ?></p></div>
 </body>
 </html>

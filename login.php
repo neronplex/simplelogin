@@ -75,26 +75,26 @@ if($_SERVER[REQUEST_METHOD] != 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-<!- 文字化け対策の文字コード ->
+<!-- 文字化け対策の文字コード -->
 <meta charset="UTF-8">
 <title>ログインフォーム</title>
 </head>
 
 <body>
-<!- タイトル ->
+<!-- タイトル -->
 <h1>ログインフォーム</h1>
 
-<!- 入力フォーム ->
+<!-- 入力フォーム -->
 <form action="" method="POST">
 
-<!- CSRF対策トークン ->
+<!-- CSRF対策トークン -->
 <input type="hidden" name="token" value="<?php echo $_SESSION[token]; ?>">
 
-<!- メールアドレスとパスワードの入力 ->
+<!-- メールアドレスとパスワードの入力 -->
 <p>メールアドレス <input type="text" name="email" value="<?php echo $email; ?>"> <?php echo $err[email]; ?></p>
 <p>パスワード <input type="password" name="password" value=""> <?php echo $err[password]; ?></p>
 
-<!- submitボタン ->
+<!-- submitボタン -->
 <input type="submit" value="ログイン">
 </form>
 </body>
